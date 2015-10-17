@@ -36,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
     private Button mGod, mForfeitButton;
     private View.OnClickListener mFindBattleListener, mForfeitListener;
     private PebbleKit.PebbleDataReceiver mReceiver;
+    private static final int MOVE = 1,POS = 2,FORFEIT =3,SWITCH = 4;
+    private PebbleDictionary data;
     private final static UUID PEBBLE_APP_UUID = UUID.fromString("46263b9e-6ecf-4454-8388-0638495af75f");
 
     @Override
@@ -62,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
         };
         mGod.setOnClickListener(mFindBattleListener);
 
+
         if (mReceiver == null) {
             mReceiver = new PebbleKit.PebbleDataReceiver(PEBBLE_APP_UUID) {
 
@@ -69,7 +72,22 @@ public class MainActivity extends AppCompatActivity {
                 public void receiveData(Context context, int id, PebbleDictionary data) {
                     // Always ACKnowledge the last message to prevent timeouts
                     PebbleKit.sendAckToPebble(getApplicationContext(), id);
-
+                    if(data.contains(MOVE))
+                    {
+                        long t = data.getInteger(POS);
+                        int pos =(int) t;
+                        makeMove(pos);
+                    }
+                    else if(data.contains(SWITCH))
+                    {
+                        long t = data.getInteger(POS);
+                        int pos =(int) t;
+                        switchPokemon(pos);
+                    }
+                    else if(data.contains(FORFEIT))
+                    {
+                        forfeit();
+                    }
                     Log.i("receiveData", "Got message from Pebble!");
                     // Get action and display
 //                    int state = data.getUnsignedIntegerAsLong().intValue();
@@ -166,11 +184,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onMessage(String s) {
                 final String message = s;
+                data = new PebbleDictionary();
                 if (s.contains("request")) {
                     if (!mGotPokemon) {
                         String[] parts = message.split("request");
                         JSONObject part;
                         try {
+                            data.addString(0,"CreateParty");
                             part = getParty(parts[1].substring(1));//hard coded
                             mGotPokemon = true;
                             JSONObject temp = part.getJSONObject("side");
@@ -178,21 +198,33 @@ public class MainActivity extends AppCompatActivity {
                             Pokemon[] pokemons = new Pokemon[6];
                             for (int x = 0; x < pokes.length(); x++) {
                                 int[] pp = {12, 12, 12, 12};
+                                for(int y=0;y<4;y++)
+                                {
+                                    data.addInt32(11*x+6+y+2,pp[y]);
+                                }
                                 String[] moves = new String[4];
                                 JSONObject poke = (JSONObject) pokes.get(0);
                                 JSONArray pokeMoves = (JSONArray) poke.get("moves");
+
                                 for (int y = 0; y < 4; y++) {
                                     moves[y] = (String) pokeMoves.get(y);
+                                    data.addString(11*x+y+2,moves[y]);
                                 }
                                 String name = ((JSONObject) (pokes.get(x))).getString("ident").split(":")[1];
+                                int pokekeyname = 11*x+1;
+                                data.addString(pokekeyname, name);
                                 int hp = Integer.parseInt(((JSONObject) (pokes.get(x))).getString("condition").split("/")[1]);
+                                data.addInt32(11*x+6,hp);data.addInt32(11*x+7,hp);
                                 pokemons[x] = new Pokemon(name, moves, pp, hp);
+                                PebbleKit.sendDataToPebble(getApplicationContext(),PEBBLE_APP_UUID,data);
                             }
                             mParty = new Party(pokemons);
+
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
                     } else if (message.contains("active")) {
+                        data.addString(0,"UpdateMoves");
                         String[] parts = message.split("request");
                         JSONObject part;
                         try {
@@ -207,9 +239,12 @@ public class MainActivity extends AppCompatActivity {
                                 else
                                     mParty.getPokemon(0).changeCurrentPP(x, 0);
                                 mParty.getPokemon(0).changeTotalPP(x, moves.getInt("maxpp"));
+                                data.addInt32(x + 1, (moves.getInt("pp")));
+                                data.addInt32(x+1+4,(moves.getInt("maxpp")));
                                 Log.d("PPChanges", Integer.toString(moves.getInt("pp")));
                                 Log.d("PPChanges", Integer.toString(moves.getInt("maxpp")));
                             }
+                            PebbleKit.sendDataToPebble(getApplicationContext(),PEBBLE_APP_UUID,data);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -220,17 +255,21 @@ public class MainActivity extends AppCompatActivity {
                     mBattleRoom = mBattleRoom.replaceAll("\n", "");
                     Log.d("BattleRoom", mBattleRoom);
                 } else if ((message.contains("-damage") || message.contains("-heal")) && mParty != null) {
+                    data.addString(0,"ChangeHp");
                     String pokemonName = mParty.getPokemon(0).getName();
                     if (message.contains(pokemonName)) {
                         if (message.contains("fnt")) {
                             mParty.getPokemon(0).setFainted();
                             mParty.getPokemon(0).changeHp(0);
+                            data.addInt32(1,0);
                         } else {
                             String[] part = message.split("\\|");
                             String hps = part[2];
                             String[] healths = hps.split("/");
                             mParty.getPokemon(0).changeHp(Integer.parseInt(healths[0]));
+                            data.addInt32(1,Integer.parseInt((healths[0])));
                         }
+                        PebbleKit.sendDataToPebble(getApplicationContext(),PEBBLE_APP_UUID,data);
                         Log.d("Hploss", Integer.toString(mParty.getPokemon(0).getHp()));
                     }
                 }
