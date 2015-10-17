@@ -6,7 +6,9 @@
 
 var UI = require('ui');
 var Vector2 = require('vector2');
-var ajax = require('ajax');
+var Utils = require('utils');
+
+// TITLE SCREEN
 
 var title = new UI.Card({
   title: 'PokePebble',
@@ -16,12 +18,55 @@ var title = new UI.Card({
 
 title.show();
 
+// BATTLE SCREEN
+
+var battleWind = new UI.Window({
+  fullscreen: true
+});
+var drawBattleWind = function (state) {
+  // TODO
+};
+var clearRect = new UI.Rect({
+  size: new Vector2(144, 168)
+});
+battleWind.add(clearRect);
+var infoRect = new UI.Rect({
+  position: new Vector2(0, 144),
+  size: new Vector2(144, 24),
+  borderColor: 'black',
+  backgroundColor: 'white'
+});
+battleWind.add(infoRect);
+var infoText = new UI.Text({
+  text: "The battle has started. Press SELECT",
+  font: 'gothic-14-bold',
+  color: 'black',
+  textOverflow: 'wrap',
+  textAlign: 'left',
+  position: new Vector2(0, 144)
+});
+battleWind.add(infoText);
+var textQueue = [];
+var displayingText = false;
+var displayText = function (msg) {
+  if (msg) textQueue.push(msg);
+  if (displayingText || textQueue.length === 0) return;
+  displayingText = true;
+  infoText.text = textQueue.shift();
+  setTimeout(function () {
+    displayingText = false;
+    if (textQueue.length > 0) displayText();
+  }, 1000);
+};
+
 // Login
 var ws = new WebSocket("ws://159.203.89.223:8000/showdown/websocket");
 var username;
 var challstr;
 var currRoom = null;
 var battleState = null;
+var currPoke = {};
+var opponentPoke = {};
 ws.onmessage = function (e) {
   // Parse message
   var messages = e.data.split("\n");
@@ -29,18 +74,114 @@ ws.onmessage = function (e) {
   for (var i = 0; i < messages.length; i++) {
     var message = messages[i];
     console.log(message);
+    
     if (currRoom) {
       // Parse battle messages
-      if (message.length !== 0 && message[0] === '>') {
+      if (message.length > 0 && message[0] !== '>') {
         args = message.split('|');
         cmd = args[1];
         if (cmd === 'request') {
           // Update battle state
           battleState = JSON.parse(args[2]);
-          // TODO: call update
+        } else if (cmd === 'switch') {
+          // Process pokemon switch
+          var affectedPlayerNum = args[2].slice(0, 2);
+          var switchInfo = args[3];
+          var pokeInfo = Utils.parseSwitchInfo(switchInfo);
+          var switchHP = args[4];
+          var hp = Utils.parseHP(switchHP);
+          if (affectedPlayerNum === battleState.side.id) {
+            // Switch is yours
+            currPoke = pokeInfo;
+            currPoke.hp = hp;
+          } else {
+            // Switch is opponents
+            opponentPoke = pokeInfo;
+            opponentPoke.hp = hp;
+          }
+        } else if (cmd === 'detailschange') {
+          // Process details change (e.g. mega evolution, forme change)
+          var affectedPlayerNum = args[2].slice(0, 2);
+          var switchInfo = args[3];
+          var pokeInfo = Utils.parseSwitchInfo(switchInfo);
+          var hp;
+          if (affectedPlayerNum === battleState.side.id) {
+            // Change is yours
+            hp = currPoke.hp;
+            currPoke = pokeInfo;
+            currPoke.hp = hp;
+          } else {
+            // Change is opponents
+            hp = opponentPoke.hp;
+            opponentPoke = pokeInfo;
+            opponentPoke.hp = hp;
+          }
+        } else if (cmd === 'cant') {
+          // Process pokemon inability
+          var affectedPlayerNum = args[2].slice(0, 2);
+          var affectedPoke = args[2].slice(5);
+          var reason = args[3];
+          console.log(affectedPlayerNum, "'s", affectedPoke, "failed to move because of", reason);
+          displayText(affectedPlayerNum + "'s " + affectedPoke + " failed to move because of " + reason);
+        } else if (cmd === 'faint') {
+          // Process pokemon faint
+          var affectedPlayerNum = args[2].slice(0, 2);
+          var affectedPoke = args[2].slice(5);
+          console.log(affectedPlayerNum, "'s", affectedPoke, "fainted");
+          displayText(affectedPlayerNum + "'s " + affectedPoke + " fainted");
+        } else if (cmd === '-fail') {
+          // Process action failure
+        } else if (cmd === '-damage') {
+          // Process damage
+        } else if (cmd === '-heal') {
+          // Process heal
+        } else if (cmd === '-status') {
+          // Process status
+        } else if (cmd === '-curestatus') {
+          // Process cure status
+        } else if (cmd === '-cureteam') {
+          // Process cure team
+        } else if (cmd === '-boost') {
+          // Process stat boost
+        } else if (cmd === '-unboost') {
+          // Process stat unboost
+        } else if (cmd === '-weather') {
+          // Process weather
+        } else if (cmd === '-sidestart') {
+          // Process hazards
+        } else if (cmd === '-sideend') {
+          // Process hazard removal
+        } else if (cmd === '-crit') {
+          // Process crit
+        } else if (cmd === '-supereffective') {
+          // Process super effective
+        } else if (cmd === '-resisted') {
+          // Process resisted
+        } else if (cmd === '-immune') {
+          // Process immune
+        } else if (cmd === '-item') {
+          // Process item change or revelation
+        } else if (cmd === '-enditem') {
+          // Process item use or destruction
+        } else if (cmd === '-ability') {
+          // Process ability activation or change
+        } else if (cmd === '-endability') {
+          // Process ability suppression
+        } else if (cmd === '-mega') {
+          // Process mega evolution
+          var megaPoke = args[2];
+          var megastone = args[3];
+          console.log(megaPoke, "evolved using a ", megastone);
+          displayText(megaPoke + " evolved using a " + megastone);
+        } else if (cmd === '-activate') {
+          // Process misc effect
         }
+        
+        // TODO: call update battle screen function
       }
+      
     } else {
+      
       if (message[0] === '>') {
         // Change to battle state and screen
         currRoom = message.slice(1);
@@ -60,6 +201,7 @@ ws.onmessage = function (e) {
         }
       }
     }
+    
   }
 };
 
@@ -90,35 +232,6 @@ title.on('click', 'select', function (e) {
     title.show();
   });
 });
-
-// BATTLE SCREEN
-
-var battleWind = new UI.Window({
-  fullscreen: true
-});
-var drawBattleWind = function (state) {
-  // TODO
-};
-var clearRect = new UI.Rect({
-  size: new Vector2(144, 168)
-});
-battleWind.add(clearRect);
-var infoRect = new UI.Rect({
-  position: new Vector2(0, 144),
-  size: new Vector2(144, 24),
-  borderColor: 'black',
-  backgroundColor: 'white'
-});
-battleWind.add(infoRect);
-var infoText = new UI.Text({
-  text: "The battle has started. Press SELECT",
-  font: 'gothic-14',
-  color: 'black',
-  textOverflow: 'wrap',
-  textAlign: 'left',
-  position: new Vector2(0, 144)
-});
-battleWind.add(infoText);
 
 // BATTLE MENUS
 
