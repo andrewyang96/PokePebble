@@ -113,37 +113,6 @@ battleWind.add(infoRect);
 
 // BATTLE MENUS
 
-var battleMenu = new UI.Menu({
-  sections: [{
-    title: 'Options',
-    items: [{
-      title: 'Attack'
-    }, {
-      title: 'Switch'
-    }, {
-      title: 'Forfeit'
-    }]
-  }]
-});
-battleMenu.on('click', 'back', function (e) {
-  battleWind.show();
-});
-battleMenu.on('click', 'select', function (e) {
-  switch (e.itemIndex) {
-    case 0:
-      attackMenu.show();
-      break;
-    case 1:
-      switchMenu.show();
-      break;
-    case 2:
-      forfeitMenu.show();
-      break;
-    default:
-      console.log("Error occured on battle menu");
-  }
-});
-
 // TODO: make attackMenu and switchMenu dynamic
 
 var attackMenu = new UI.Menu({
@@ -160,13 +129,6 @@ var attackMenu = new UI.Menu({
       subtitle: 'Yet even more info'
     }]
   }]
-});
-attackMenu.on('click', 'back', function (e) {
-  battleMenu.show();
-});
-attackMenu.on('click', 'select', function (e) {
-  // TODO: send websocket attack
-  console.log("Selected", e.itemIndex+1, "attack");
 });
 
 var switchMenu = new UI.Menu({
@@ -187,13 +149,6 @@ var switchMenu = new UI.Menu({
     }]
   }]
 });
-switchMenu.on('click', 'back', function (e) {
-  battleMenu.show();
-});
-switchMenu.on('click', 'select', function (e) {
-  // TODO: send websocket switch
-  console.log("Switch to", e.itemIndex+2);
-});
 
 var forfeitMenu = new UI.Menu({
   sections: [{
@@ -207,10 +162,61 @@ var forfeitMenu = new UI.Menu({
     }]
   }]
 });
+
+var battleMenu = new UI.Menu({
+  sections: [{
+    title: 'Options',
+    items: [{
+      title: 'Attack'
+    }, {
+      title: 'Switch'
+    }, {
+      title: 'Forfeit'
+    }]
+  }]
+});
+
+// BATTLE MENUS ACTIONS
+
+battleMenu.on('click', 'back', function (e) {
+  battleWind.show();
+});
+battleMenu.on('select', function (e) {
+  switch (e.itemIndex) {
+    case 0:
+      attackMenu.show();
+      break;
+    case 1:
+      switchMenu.show();
+      break;
+    case 2:
+      forfeitMenu.show();
+      break;
+    default:
+      console.log("Error occured on battle menu");
+  }
+});
+
+attackMenu.on('click', 'back', function (e) {
+  battleMenu.show();
+});
+attackMenu.on('select', function (e) {
+  // TODO: send websocket attack
+  console.log("Selected", e.itemIndex+1, "attack");
+});
+
+switchMenu.on('click', 'back', function (e) {
+  battleMenu.show();
+});
+switchMenu.on('select', function (e) {
+  // TODO: send websocket switch
+  console.log("Switch to", e.itemIndex+2);
+});
+
 forfeitMenu.on('click', 'back', function (e) {
   battleMenu.show();
 });
-forfeitMenu.on('click', 'select', function (e) {
+forfeitMenu.on('select', function (e) {
   switch (e.itemIndex) {
     case 0:
       battleMenu.show();
@@ -219,8 +225,10 @@ forfeitMenu.on('click', 'select', function (e) {
       // Forfeit :sadface:
       ws.send(currRoom + '|/forfeit');
       // TODO: handle forfeit
+      currRoom = null;
+      title.show();
   }
-})
+});
 
 battleWind.on('click', 'select', function (e) {
   battleMenu.show();
