@@ -20,27 +20,42 @@ var ws = new WebSocket("ws://159.203.89.223:8000/showdown/websocket");
 var username;
 var challstr;
 var currRoom = null;
+var battleState = null;
 ws.onmessage = function (e) {
   // Parse message
-  var message = e.data;
-  console.log(message);
-  if (currRoom) {
-    // Parse battle messages
-  } else {
-    if (message[0] === '>') {
-      currRoom = cmd.slice(1);
-      return;
-    }
-    var args = message.split("|");
-    var cmd = args[1];
-    if (cmd === 'updateuser') {
-      // Update username
-      username = args[2];
-      console.log("Username is", username);
-    } else if (cmd === 'challstr') {
-      // Get login information
-      challstr = message.match(/\|challstr\|(.*)/)[1];
-      console.log("Challstr is", challstr);
+  var messages = e.data.split("\n");
+  for (var i = 0; i < messages.length; i++) {
+    var message = messages[i];
+    console.log(message);
+    if (currRoom) {
+      // Parse battle messages
+      if (messsage.length !== 0 && message[0] === '>') {
+        var args = message.split('|');
+        var cmd = args[1];
+        if (cmd === 'request') {
+          // Update battle state
+          battleState = JSON.parse(args[2]);
+          // TODO: call update
+        }
+      }
+    } else {
+      if (message[0] === '>') {
+        // Change to battle state
+        currRoom = cmd.slice(1);
+        // TOOD: change to battle screen
+      } else {
+        var args = message.split("|");
+        var cmd = args[1];
+        if (cmd === 'updateuser') {
+          // Update username
+          username = args[2];
+          console.log("Username is", username);
+        } else if (cmd === 'challstr') {
+          // Get login information
+          challstr = message.match(/\|challstr\|(.*)/)[1];
+          console.log("Challstr is", challstr);
+        }
+      }
     }
   }
 };
