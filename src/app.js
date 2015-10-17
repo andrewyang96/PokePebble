@@ -5,6 +5,7 @@
  */
 
 var UI = require('ui');
+var Vector2 = require('vector2');
 var ajax = require('ajax');
 
 var title = new UI.Card({
@@ -24,14 +25,15 @@ var battleState = null;
 ws.onmessage = function (e) {
   // Parse message
   var messages = e.data.split("\n");
+  var args, cmd;
   for (var i = 0; i < messages.length; i++) {
     var message = messages[i];
     console.log(message);
     if (currRoom) {
       // Parse battle messages
-      if (messsage.length !== 0 && message[0] === '>') {
-        var args = message.split('|');
-        var cmd = args[1];
+      if (message.length !== 0 && message[0] === '>') {
+        args = message.split('|');
+        cmd = args[1];
         if (cmd === 'request') {
           // Update battle state
           battleState = JSON.parse(args[2]);
@@ -40,12 +42,13 @@ ws.onmessage = function (e) {
       }
     } else {
       if (message[0] === '>') {
-        // Change to battle state
-        currRoom = cmd.slice(1);
-        // TOOD: change to battle screen
+        // Change to battle state and screen
+        currRoom = message.slice(1);
+        console.log("Current room is", currRoom);
+        battleWind.show();
       } else {
-        var args = message.split("|");
-        var cmd = args[1];
+        args = message.split("|");
+        cmd = args[1];
         if (cmd === 'updateuser') {
           // Update username
           username = args[2];
@@ -64,6 +67,8 @@ ws.onerror = function (error) {
   // Log error
   console.log("Error:", error);
 };
+
+// TITLE SCREEN AND SEARCH SCREEN
 
 title.on('click', 'back', function (e) {
   // Logout
@@ -85,3 +90,23 @@ title.on('click', 'select', function (e) {
     title.show();
   });
 });
+
+// BATTLE SCREEN
+
+var battleWind = new UI.Window({
+  fullscreen: true
+});
+var drawBattleWind = function (state) {
+  // TODO
+};
+var clearRect = new UI.Rect({
+  size: new Vector2(144, 168)
+});
+battleWind.add(clearRect);
+var infoRect = new UI.Rect({
+  position: new Vector2(0, 144),
+  size: new Vector2(144, 24),
+  borderColor: 'black',
+  backgroundColor: 'white'
+});
+battleWind.add(infoRect);
