@@ -45,18 +45,17 @@ battleWindMenu.on('click', 'back', function (e) {});
 
 // Login
 var username;
-var challstr;
 var currRoom;
 
 // TITLE SCREEN AND SEARCH SCREEN
 
 title.on('click', 'back', function (e) {
   // Logout
-  Pebble.sendAppMessage({ '0': 'logout' }, function (e) {
+  /*Pebble.sendAppMessage({ '0': 'logout' }, function (e) {
     console.log("Logout acknowledged");
   }, function (e) {
     console.log("Logout failed");
-  });
+  });*/
 });
 
 title.on('click', 'select', function (e) {
@@ -65,14 +64,14 @@ title.on('click', 'select', function (e) {
   searching.body('Press BACK to cancel.');
   searching.show();
   // Search for an opponent
-  Pebble.sendAppMessage({ '0': 'search' }, function (e) {
+  Pebble.sendAppMessage({ '0': 1, '1': 1 }, function (e) {
     console.log("Searching for battle");
   }, function (e) {
     console.log("Failed to search for battle");
   });
   searching.on('click', 'back', function (e) {
     // Cancel search
-    Pebble.sendAppMessage({ '0': 'cancelsearch' }, function (e) {
+    Pebble.sendAppMessage({ '0': 1, '1': 0 }, function (e) {
       console.log("Canceled search");
       title.show();
     }, function (e) {
@@ -178,7 +177,7 @@ attackMenu.on('click', 'back', function (e) {
 });
 attackMenu.on('select', function (e) {
   // Select attack
-  Pebble.sendAppMessage({ '0': 'attack', '1': e.itemIndex+1 }, function () {
+  Pebble.sendAppMessage({ '0': 2, '1': e.itemIndex+1 }, function () {
     console.log("Selected", e.itemIndex+1, "attack");
     battleMenu.show();
   }, function () {
@@ -191,7 +190,7 @@ switchMenu.on('click', 'back', function (e) {
 });
 switchMenu.on('select', function (e) {
   // Switch pokemon
-  Pebble.sendAppMessage({ '0': 'switch', '1': e.itemIndex+2 }, function () {
+  Pebble.sendAppMessage({ '0': 3, '1': e.itemIndex }, function () {
     console.log("Switch to", e.itemIndex+2);
   }, function () {
     console.log("Failed to switch to", e.itemIndex+2);
@@ -208,7 +207,7 @@ forfeitMenu.on('select', function (e) {
       break;
     case 1:
       // Forfeit :sadface:
-      Pebble.sendAppMessage({ '0': 'forfeit' }, function () {
+      Pebble.sendAppMessage({ '0': 4 }, function () {
         console.log("Forfeited!");
         currRoom = null;
         title.show();
@@ -230,7 +229,7 @@ battleWindMenu.on('click', 'select', function (e) {
 
 Pebble.addEventListener('ready', function (e) {
   // First retrieve login info
-  Pebble.sendAppMessage({ '0': 'login' }, function (e) {
+  Pebble.sendAppMessage({ '0': 0 }, function (e) {
     console.log("Login request received.");
   }, function (e) {
     console.log("Login request failed:", e.error.message);
@@ -242,7 +241,6 @@ Pebble.addEventListener('appmessage', function (e) {
   if (firstEl.login) {
     // Store login info
     username = firstEl.username;
-    challstr = firstEl.challstr;
   } else if (firstEl.startBattle) {
     // Store room info and render battle screen with first pokemon
     currRoom = firstEl.roomid;
