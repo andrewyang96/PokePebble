@@ -110,6 +110,15 @@ var infoRect = new UI.Rect({
   backgroundColor: 'white'
 });
 battleWind.add(infoRect);
+var infoText = new UI.Text({
+  text: "The battle has started. Press SELECT",
+  font: 'gothic-14',
+  color: 'black',
+  textOverflow: 'wrap',
+  textAlign: 'left',
+  position: new Vector2(0, 144)
+});
+battleWind.add(infoText);
 
 // BATTLE MENUS
 
@@ -127,6 +136,9 @@ var attackMenu = new UI.Menu({
     }, {
       title: 'Attack 3',
       subtitle: 'Yet even more info'
+    }, {
+      title: 'Attack 4',
+      subtitle: 'info'
     }]
   }]
 });
@@ -146,6 +158,9 @@ var switchMenu = new UI.Menu({
     }, {
       title: 'Pokemon 4',
       subtitle: 'Fourth info'
+    }, {
+      title: 'Pokemon 5',
+      subtitle: 'Last poke'
     }]
   }]
 });
@@ -203,6 +218,8 @@ attackMenu.on('click', 'back', function (e) {
 attackMenu.on('select', function (e) {
   // TODO: send websocket attack
   console.log("Selected", e.itemIndex+1, "attack");
+  ws.send(currRoom + '|/move ' + (e.itemIndex+1));
+  battleMenu.show();
 });
 
 switchMenu.on('click', 'back', function (e) {
@@ -211,6 +228,7 @@ switchMenu.on('click', 'back', function (e) {
 switchMenu.on('select', function (e) {
   // TODO: send websocket switch
   console.log("Switch to", e.itemIndex+2);
+  ws.send(currRoom + '|/switch ' + (e.itemIndex+2));
 });
 
 forfeitMenu.on('click', 'back', function (e) {
@@ -226,7 +244,12 @@ forfeitMenu.on('select', function (e) {
       ws.send(currRoom + '|/forfeit');
       // TODO: handle forfeit
       currRoom = null;
+      ws.send(currRoom + '|/leave');
       title.show();
+      break;
+    default:
+      battleMenu.show();
+      break;
   }
 });
 
