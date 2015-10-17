@@ -1,18 +1,19 @@
 package seniorcheeseman.pokepebbleassistapp;
 
+import android.content.Context;
 import android.os.Build;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import org.apache.http.message.BasicNameValuePair;
+import com.getpebble.android.kit.PebbleKit;
+import com.getpebble.android.kit.util.PebbleDictionary;
+
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONArray;
@@ -21,8 +22,7 @@ import org.json.JSONObject;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.UUID;
 
 import PokemonParts.Party;
 import PokemonParts.Pokemon;
@@ -33,8 +33,11 @@ public class MainActivity extends AppCompatActivity {
     private boolean mGotPokemon;
     private Party mParty;
     private String mBattleRoom;
-    private Button mGod,mForfeitButton;
-    private View.OnClickListener mFindBattleListener,mForfeitListener;
+    private Button mGod, mForfeitButton;
+    private View.OnClickListener mFindBattleListener, mForfeitListener;
+    private PebbleKit.PebbleDataReceiver mReceiver;
+    private final static UUID PEBBLE_APP_UUID = UUID.fromString("EC7EE5C6-8DDF-4089-AA84-C3396A11CC95");
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
         mGotPokemon = false;
         mGod = (Button) findViewById(R.id.testButton);
         mForfeitButton = (Button) findViewById(R.id.forfeitButton);
-        mForfeitListener= new View.OnClickListener() {
+        mForfeitListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 forfeit();
@@ -59,44 +62,67 @@ public class MainActivity extends AppCompatActivity {
         };
         mGod.setOnClickListener(mFindBattleListener);
 
+        if (mReceiver == null) {
+            mReceiver = new PebbleKit.PebbleDataReceiver(PEBBLE_APP_UUID) {
+
+                @Override
+                public void receiveData(Context context, int id, PebbleDictionary data) {
+                    // Always ACKnowledge the last message to prevent timeouts
+                    PebbleKit.sendAckToPebble(getApplicationContext(), id);
+                    // Get action and display
+//                    int state = data.getUnsignedIntegerAsLong().intValue();
+                }
+
+            };
+        }
+
+        // Register the receiver to get data
+        PebbleKit.registerReceivedDataHandler(this, mReceiver);
 
     }
 
-    private void forfeit()
-    {
-        String giveUp = mBattleRoom+ "|/forfeit";
+    private void forfeit() {
+        String giveUp = mBattleRoom + "|/forfeit";
         sendMessage(giveUp);
         mForfeitButton.setOnClickListener(null);//todo make it invisible
         mGod.setOnClickListener(mFindBattleListener);
     }
 
 
-    private void findRandomBattle()
-    {
+    private void findRandomBattle() {
         sendMessage("|/cancelsearch");
         sendMessage("|/search randombattle");
     }
 
-    private void makeMove(int move)
-    {
-        String in = Integer.toString(move+1);
-        sendMessage(mBattleRoom+"|/move "+in);
+    private void makeMove(int move) {
+        String in = Integer.toString(move + 1);
+        sendMessage(mBattleRoom + "|/move " + in);
     }
 
-    private void switchPokemon(int pos)
-    {
-        String in = Integer.toString(pos+1);
-        mParty.switchPokemon(0,pos);
-        sendMessage(mBattleRoom+"|/switch "+ in);
+    private void switchPokemon(int pos) {
+        String in = Integer.toString(pos + 1);
+        mParty.switchPokemon(0, pos);
+        sendMessage(mBattleRoom + "|/switch " + in);
     }
 
 
     @Override
-    protected void onDestroy()
-    {
+    protected void onDestroy() {
         super.onDestroy();
         mWebSocketClient.close();
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        boolean isConnected = PebbleKit.isWatchConnected(this);
+
+        Toast.makeText(this, "Pebble " + (isConnected ? "is" : "is not") + " connected!", Toast.LENGTH_LONG).show();
+        boolean appMessageSupported = PebbleKit.areAppMessagesSupported(this);
+        Log.d("PebbleMessages", (appMessageSupported) ? "true" : "false");
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -118,6 +144,7 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
     private void connectWebSocket() {
         URI uri;
         try {
@@ -137,43 +164,75 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onMessage(String s) {
                 final String message = s;
-                if(s.contains("request")&&!mGotPokemon)
-                {
-                    String[] parts = message.split("request");
-                    JSONObject part;
-                    try {
-                        part = getParty(parts[1].substring(1));//hard coded
-                        mGotPokemon = true;
-                        JSONObject temp = part.getJSONObject("side");
-                        JSONArray pokes = temp.getJSONArray("pokemon");
-                        Pokemon[] pokemons = new Pokemon[6];
-                        for(int x=0; x<pokes.length();x++) {
-                            int[] pp = {12,12,12,12};
-                            String[] moves = new String[4];
-                            JSONObject poke =(JSONObject) pokes.get(0);
-                            JSONArray pokeMoves = (JSONArray) poke.get("moves");
-                            for(int y=0; y<4;y++)
-                            {
-                                moves[y] = (String) pokeMoves.get(y);
+                if (s.contains("request")) {
+                    if (!mGotPokemon) {
+                        String[] parts = message.split("request");
+                        JSONObject part;
+                        try {
+                            part = getParty(parts[1].substring(1));//hard coded
+                            mGotPokemon = true;
+                            JSONObject temp = part.getJSONObject("side");
+                            JSONArray pokes = temp.getJSONArray("pokemon");
+                            Pokemon[] pokemons = new Pokemon[6];
+                            for (int x = 0; x < pokes.length(); x++) {
+                                int[] pp = {12, 12, 12, 12};
+                                String[] moves = new String[4];
+                                JSONObject poke = (JSONObject) pokes.get(0);
+                                JSONArray pokeMoves = (JSONArray) poke.get("moves");
+                                for (int y = 0; y < 4; y++) {
+                                    moves[y] = (String) pokeMoves.get(y);
+                                }
+                                String name = ((JSONObject) (pokes.get(x))).getString("ident").split(":")[1];
+                                int hp = Integer.parseInt(((JSONObject) (pokes.get(x))).getString("condition").split("/")[1]);
+                                pokemons[x] = new Pokemon(name, moves, pp, hp);
                             }
-                            String name = ((JSONObject)(pokes.get(x))).getString("ident").split(":")[1];
-                            int hp = Integer.parseInt(((JSONObject)(pokes.get(x))).getString("condition").split("/")[1]);
-                            pokemons[x] = new Pokemon(name,moves,pp,hp);
+                            mParty = new Party(pokemons);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
-                        mParty = new Party(pokemons);
-                    }catch(JSONException e)
-                    {
-                        e.printStackTrace();
+                    } else if (message.contains("active")) {
+                        String[] parts = message.split("request");
+                        JSONObject part;
+                        try {
+                            part = getParty(parts[1].substring(1));
+                            JSONArray temp = part.getJSONArray("active");
+                            JSONObject first = (JSONObject) temp.get(0);
+                            temp = first.getJSONArray("moves");
+                            for (int x = 0; x < first.length(); x++) {
+                                JSONObject moves = (JSONObject) temp.get(x);
+                                if (!moves.getBoolean("disabled"))
+                                    mParty.getPokemon(0).changeCurrentPP(x, moves.getInt("pp"));
+                                else
+                                    mParty.getPokemon(0).changeCurrentPP(x, 0);
+                                mParty.getPokemon(0).changeTotalPP(x, moves.getInt("maxpp"));
+                                Log.d("PPChanges", Integer.toString(moves.getInt("pp")));
+                                Log.d("PPChanges", Integer.toString(moves.getInt("maxpp")));
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
-                }
-                else if(message.contains("battle-randombattle")&&mBattleRoom==null)
-                {
+                } else if (message.contains("battle-randombattle") && mBattleRoom == null) {
                     String[] notBattleRoom = message.split("\\|");
                     mBattleRoom = notBattleRoom[0].substring(1);
-                    mBattleRoom = mBattleRoom.replaceAll("\n","");
+                    mBattleRoom = mBattleRoom.replaceAll("\n", "");
                     Log.d("BattleRoom", mBattleRoom);
+                } else if ((message.contains("-damage") || message.contains("-heal")) && mParty != null) {
+                    String pokemonName = mParty.getPokemon(0).getName();
+                    if (message.contains(pokemonName)) {
+                        if (message.contains("fnt")) {
+                            mParty.getPokemon(0).setFainted();
+                            mParty.getPokemon(0).changeHp(0);
+                        } else {
+                            String[] part = message.split("\\|");
+                            String hps = part[2];
+                            String[] healths = hps.split("/");
+                            mParty.getPokemon(0).changeHp(Integer.parseInt(healths[0]));
+                        }
+                        Log.d("Hploss", Integer.toString(mParty.getPokemon(0).getHp()));
+                    }
                 }
-                Log.d(TAG,message);
+                Log.d(TAG, message);
             }
 
             @Override
@@ -188,19 +247,20 @@ public class MainActivity extends AppCompatActivity {
         };
         mWebSocketClient.connect();
     }
+
     public void sendMessage(String message) {
         mWebSocketClient.send(message);
-        Log.d("WebsocketMessages",message);
-        Toast.makeText(this,message +": has been sent", Toast.LENGTH_LONG).show();
+        Log.d("WebsocketMessages", message);
+        Toast.makeText(this, message + ": has been sent", Toast.LENGTH_LONG).show();
     }
 
     /**
      * Parses the websocket input to get jsonarray of the pokemon
+     *
      * @param input
      * @return JSONObject of pokemon
      */
-    public JSONObject getParty(String input) throws JSONException
-    {
+    public JSONObject getParty(String input) throws JSONException {
         JSONObject party = new JSONObject(input);
         return party;
     }
