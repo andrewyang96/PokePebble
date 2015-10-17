@@ -18,7 +18,9 @@ public class Pokemon {
         mHp = maxhp;
         mMoves = moves;
         mFainted = false;
-        for (int x = 0; x < totalPP.length; x++) {
+        mTotalPP = new int[4];
+        mCurrentPP = new int[4];
+        for (int x = 0; x < 4; x++) {
             mTotalPP[x] = totalPP[x];
             mCurrentPP[x] = totalPP[x];
         }
@@ -40,14 +42,15 @@ public class Pokemon {
         return mHp;
     }
 
-    /**
-     * Updates pp of the move
-     *
-     * @param move
-     */
-    public void useMove(int move) {
-        mCurrentPP[move]--;
+    public void changeCurrentPP(int move, int pp) {
+        mCurrentPP[move]= pp;
     }
+
+    public void changeTotalPP(int move,int mpp)
+    {
+        mTotalPP[move]= mpp;
+    }
+
 
     public int getMaxhp() {
         return mMaxhp;

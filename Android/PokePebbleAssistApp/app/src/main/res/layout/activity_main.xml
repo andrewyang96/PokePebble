@@ -16,4 +16,9 @@
         android:id="@+id/testButton"
         android:layout_below="@+id/message"
         android:layout_toEndOf="@+id/message" />
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="forfeit"
+        android:id="@+id/forfeitButton"/>
 </RelativeLayout>

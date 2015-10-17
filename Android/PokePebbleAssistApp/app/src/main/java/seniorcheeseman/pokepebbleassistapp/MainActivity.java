@@ -15,6 +15,7 @@ import android.widget.Toast;
 import org.apache.http.message.BasicNameValuePair;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -23,10 +24,14 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
 
+import PokemonParts.Party;
+import PokemonParts.Pokemon;
+
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MyActivity";
     private WebSocketClient mWebSocketClient;
     private boolean mGotPokemon;
+    private Party mParty;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,13 +103,31 @@ public class MainActivity extends AppCompatActivity {
                 if(s.contains("request")&&!mGotPokemon)
                 {
                     String[] parts = message.split("request");
+                    JSONObject part;
                     try {
-                        getParty(parts[1].substring(1));//hard coded
+                        part = getParty(parts[1].substring(1));//hard coded
+                        mGotPokemon = true;
+                        JSONObject temp = part.getJSONObject("side");
+                        JSONArray pokes = temp.getJSONArray("pokemon");
+                        Pokemon[] pokemons = new Pokemon[6];
+                        for(int x=0; x<pokes.length();x++) {
+                            int[] pp = {12,12,12,12};
+                            String[] moves = new String[4];
+                            JSONObject poke =(JSONObject) pokes.get(0);
+                            JSONArray pokeMoves = (JSONArray) poke.get("moves");
+                            for(int y=0; y<4;y++)
+                            {
+                                moves[y] = (String) pokeMoves.get(y);
+                            }
+                            String name = ((JSONObject)(pokes.get(x))).getString("ident").split(":")[1];
+                            int hp = Integer.parseInt(((JSONObject)(pokes.get(x))).getString("condition").split("/")[1]);
+                            pokemons[x] = new Pokemon(name,moves,pp,hp);
+                        }
+                        mParty = new Party(pokemons);
                     }catch(JSONException e)
                     {
                         e.printStackTrace();
                     }
-                    mGotPokemon = true;
                 }
                 Log.d(TAG,message);
             }

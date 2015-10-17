@@ -10,8 +10,12 @@ public class Party {
         mParty = party;
     }
 
-    public void useMove(int move) {
-        mParty[0].useMove(move);
+    public Pokemon getPokemon(int pos)
+    {
+        return mParty[pos];
+    }
+    public void update(int move,int pp) {
+        mParty[0].changeCurrentPP(move, pp);
     }
 
     public void faintPokemon() {
