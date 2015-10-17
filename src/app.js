@@ -27,7 +27,7 @@ ws.onmessage = function (e) {
   if (currRoom) {
     // Parse battle messages
   } else {
-    if (cmd[0] === '>') {
+    if (message[0] === '>') {
       currRoom = cmd.slice(1);
       return;
     }
