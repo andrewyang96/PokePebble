@@ -15,6 +15,8 @@ import android.widget.Toast;
 import org.apache.http.message.BasicNameValuePair;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -24,20 +26,29 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MyActivity";
     private WebSocketClient mWebSocketClient;
+    private boolean mGotPokemon;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         connectWebSocket();
-        Button god = (Button) findViewById(R.id.testButton);
+        mGotPokemon = false;
+        final Button god = (Button) findViewById(R.id.testButton);
         god.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG,"sent message");
-                sendMessage("yolo");
+                findRandomBattle();
+                god.setOnClickListener(null);
             }
         });
     }
+
+    private void findRandomBattle()
+    {
+        sendMessage("|/clearsearch");
+        sendMessage("|/search randombattle");
+    }
+
     @Override
     protected void onPause()
     {
@@ -84,6 +95,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onMessage(String s) {
                 final String message = s;
+                if(s.contains("request")&&!mGotPokemon)
+                {
+                    String[] parts = message.split("request");
+                    try {
+                        getParty(parts[1].substring(1));//hard coded
+                    }catch(JSONException e)
+                    {
+                        e.printStackTrace();
+                    }
+                    mGotPokemon = true;
+                }
                 Log.d(TAG,message);
             }
 
@@ -103,4 +125,16 @@ public class MainActivity extends AppCompatActivity {
         mWebSocketClient.send(message);
         Toast.makeText(this,message +": has been sent",Toast.LENGTH_LONG).show();
     }
+
+    /**
+     * Parses the websocket input to get jsonarray of the pokemon
+     * @param input
+     * @return JSONObject of pokemon
+     */
+    public JSONObject getParty(String input) throws JSONException
+    {
+        JSONObject party = new JSONObject(input);
+        return party;
+    }
+
 }
