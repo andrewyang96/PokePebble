@@ -8,10 +8,9 @@ var UI = require('ui');
 var Vector2 = require('vector2');
 
 var main = new UI.Card({
-  title: 'Pebble.js',
-  icon: 'images/menu_icon.png',
-  subtitle: 'Hello World!',
-  body: 'Press any button.'
+  title: 'PokePebble',
+  banner: 'images/LogoPS.png',
+  body: 'A Pebble client for Pokemon showdown.'
 });
 
 main.show();
