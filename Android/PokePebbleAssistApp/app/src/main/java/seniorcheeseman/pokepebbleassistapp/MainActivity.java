@@ -32,32 +32,69 @@ public class MainActivity extends AppCompatActivity {
     private WebSocketClient mWebSocketClient;
     private boolean mGotPokemon;
     private Party mParty;
+    private String mBattleRoom;
+    private Button mGod,mForfeitButton;
+    private View.OnClickListener mFindBattleListener,mForfeitListener;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         connectWebSocket();
         mGotPokemon = false;
-        final Button god = (Button) findViewById(R.id.testButton);
-        god.setOnClickListener(new View.OnClickListener() {
+        mGod = (Button) findViewById(R.id.testButton);
+        mForfeitButton = (Button) findViewById(R.id.forfeitButton);
+        mForfeitListener= new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                forfeit();
+            }
+        };
+        mFindBattleListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 findRandomBattle();
-                god.setOnClickListener(null);
+                mGod.setOnClickListener(null);
+                mForfeitButton.setOnClickListener(mForfeitListener);
             }
-        });
+        };
+        mGod.setOnClickListener(mFindBattleListener);
+
+
     }
+
+    private void forfeit()
+    {
+        String giveUp = mBattleRoom+ "|/forfeit";
+        sendMessage(giveUp);
+        mForfeitButton.setOnClickListener(null);//todo make it invisible
+        mGod.setOnClickListener(mFindBattleListener);
+    }
+
 
     private void findRandomBattle()
     {
-        sendMessage("|/clearsearch");
+        sendMessage("|/cancelsearch");
         sendMessage("|/search randombattle");
     }
 
-    @Override
-    protected void onPause()
+    private void makeMove(int move)
     {
-        super.onPause();
+        String in = Integer.toString(move+1);
+        sendMessage(mBattleRoom+"|/move "+in);
+    }
+
+    private void switchPokemon(int pos)
+    {
+        String in = Integer.toString(pos+1);
+        mParty.switchPokemon(0,pos);
+        sendMessage(mBattleRoom+"|/switch "+ in);
+    }
+
+
+    @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
         mWebSocketClient.close();
     }
     @Override
@@ -129,6 +166,13 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }
+                else if(message.contains("battle-randombattle")&&mBattleRoom==null)
+                {
+                    String[] notBattleRoom = message.split("\\|");
+                    mBattleRoom = notBattleRoom[0].substring(1);
+                    mBattleRoom = mBattleRoom.replaceAll("\n","");
+                    Log.d("BattleRoom", mBattleRoom);
+                }
                 Log.d(TAG,message);
             }
 
@@ -146,7 +190,8 @@ public class MainActivity extends AppCompatActivity {
     }
     public void sendMessage(String message) {
         mWebSocketClient.send(message);
-        Toast.makeText(this,message +": has been sent",Toast.LENGTH_LONG).show();
+        Log.d("WebsocketMessages",message);
+        Toast.makeText(this,message +": has been sent", Toast.LENGTH_LONG).show();
     }
 
     /**
