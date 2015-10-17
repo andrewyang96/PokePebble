@@ -110,3 +110,118 @@ var infoRect = new UI.Rect({
   backgroundColor: 'white'
 });
 battleWind.add(infoRect);
+
+// BATTLE MENUS
+
+var battleMenu = new UI.Menu({
+  sections: [{
+    title: 'Options',
+    items: [{
+      title: 'Attack'
+    }, {
+      title: 'Switch'
+    }, {
+      title: 'Forfeit'
+    }]
+  }]
+});
+battleMenu.on('click', 'back', function (e) {
+  battleWind.show();
+});
+battleMenu.on('click', 'select', function (e) {
+  switch (e.itemIndex) {
+    case 0:
+      attackMenu.show();
+      break;
+    case 1:
+      switchMenu.show();
+      break;
+    case 2:
+      forfeitMenu.show();
+      break;
+    default:
+      console.log("Error occured on battle menu");
+  }
+});
+
+// TODO: make attackMenu and switchMenu dynamic
+
+var attackMenu = new UI.Menu({
+  sections: [{
+    title: 'Attack',
+    items: [{
+      title: 'Attack 1',
+      subtitle: 'Some info'
+    }, {
+      title: 'Attack 2',
+      subtitle: 'Some more info'
+    }, {
+      title: 'Attack 3',
+      subtitle: 'Yet even more info'
+    }]
+  }]
+});
+attackMenu.on('click', 'back', function (e) {
+  battleMenu.show();
+});
+attackMenu.on('click', 'select', function (e) {
+  // TODO: send websocket attack
+  console.log("Selected", e.itemIndex+1, "attack");
+});
+
+var switchMenu = new UI.Menu({
+  sections: [{
+    title: 'Switch Pokemon',
+    items: [{
+      title: 'Pokemon 1',
+      subtitle: 'Its condition'
+    }, {
+      title: 'Pokemon 2',
+      subtitle: 'Second poke condition'
+    }, {
+      title: 'Pokemon 3',
+      subtitle: 'Third poke'
+    }, {
+      title: 'Pokemon 4',
+      subtitle: 'Fourth info'
+    }]
+  }]
+});
+switchMenu.on('click', 'back', function (e) {
+  battleMenu.show();
+});
+switchMenu.on('click', 'select', function (e) {
+  // TODO: send websocket switch
+  console.log("Switch to", e.itemIndex+2);
+});
+
+var forfeitMenu = new UI.Menu({
+  sections: [{
+    title: 'Are you sure?',
+    items: [{
+      title: 'No',
+      subtitle: "Don't forfeit"
+    }, {
+      title: 'Yes',
+      subtitle: 'I QUIT!'
+    }]
+  }]
+});
+forfeitMenu.on('click', 'back', function (e) {
+  battleMenu.show();
+});
+forfeitMenu.on('click', 'select', function (e) {
+  switch (e.itemIndex) {
+    case 0:
+      battleMenu.show();
+      break;
+    case 1:
+      // Forfeit :sadface:
+      ws.send(currRoom + '|/forfeit');
+      // TODO: handle forfeit
+  }
+})
+
+battleWind.on('click', 'select', function (e) {
+  battleMenu.show();
+});
