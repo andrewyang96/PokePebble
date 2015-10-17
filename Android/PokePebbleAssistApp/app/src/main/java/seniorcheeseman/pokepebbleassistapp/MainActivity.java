@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private Button mGod, mForfeitButton;
     private View.OnClickListener mFindBattleListener, mForfeitListener;
     private PebbleKit.PebbleDataReceiver mReceiver;
-    private final static UUID PEBBLE_APP_UUID = UUID.fromString("EC7EE5C6-8DDF-4089-AA84-C3396A11CC95");
+    private final static UUID PEBBLE_APP_UUID = UUID.fromString("46263b9e-6ecf-4454-8388-0638495af75f");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +69,8 @@ public class MainActivity extends AppCompatActivity {
                 public void receiveData(Context context, int id, PebbleDictionary data) {
                     // Always ACKnowledge the last message to prevent timeouts
                     PebbleKit.sendAckToPebble(getApplicationContext(), id);
+
+                    Log.i("receiveData", "Got message from Pebble!");
                     // Get action and display
 //                    int state = data.getUnsignedIntegerAsLong().intValue();
                 }
