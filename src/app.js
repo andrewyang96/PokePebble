@@ -67,7 +67,7 @@ title.on('click', 'select', function (e) {
   Pebble.sendAppMessage({ '0': 1, '1': 1 }, function (e) {
     console.log("Searching for battle");
   }, function (e) {
-    console.log("Failed to search for battle");
+    console.log("Failed to search for battle:", e.error.message);
   });
   searching.on('click', 'back', function (e) {
     // Cancel search
@@ -75,7 +75,7 @@ title.on('click', 'select', function (e) {
       console.log("Canceled search");
       title.show();
     }, function (e) {
-      console.log("Failed to cancel search");
+      console.log("Failed to cancel search:", e.error.message);
     });
   });
 });
@@ -180,8 +180,8 @@ attackMenu.on('select', function (e) {
   Pebble.sendAppMessage({ '0': 2, '1': e.itemIndex+1 }, function () {
     console.log("Selected", e.itemIndex+1, "attack");
     battleMenu.show();
-  }, function () {
-    console.log("Failed to send attack", e.itemIndex+1);
+  }, function (err) {
+    console.log("Failed to send attack", e.itemIndex+1, ":", err.error.message);
   });
 });
 
@@ -192,8 +192,8 @@ switchMenu.on('select', function (e) {
   // Switch pokemon
   Pebble.sendAppMessage({ '0': 3, '1': e.itemIndex }, function () {
     console.log("Switch to", e.itemIndex+2);
-  }, function () {
-    console.log("Failed to switch to", e.itemIndex+2);
+  }, function (err) {
+    console.log("Failed to switch to", e.itemIndex+2, ":", err.error.message);
   });
 });
 
@@ -211,8 +211,8 @@ forfeitMenu.on('select', function (e) {
         console.log("Forfeited!");
         currRoom = null;
         title.show();
-      }, function () {
-        console.log("Failed to forfeit");
+      }, function (err) {
+        console.log("Failed to forfeit:", err.error.message);
       });
       break;
     default:
