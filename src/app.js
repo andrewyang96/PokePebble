@@ -5,6 +5,7 @@
  */
 
 var UI = require('ui');
+var Vector2 = require('vector2');
 
 // TITLE SCREEN
 
@@ -18,28 +19,101 @@ title.show();
 
 // BATTLE SCREEN
 
-var battleWindMenu = new UI.Menu({
-  sections: [{
-    title: 'Opponent',
-    items: [{
-      title: 'OPPONENTPOKE',
-      subtitle: '45%, L81, PAR'
-    }]
-  }, {
-    title: 'You',
-    items: [{
-      title: 'YOURPOKEMON',
-      subtitle: '92%, L69, F, BRN'
-    }]
-  }, {
-    title: 'Action',
-    items: [{
-      title: 'The has started',
-      subtitle: 'Press SELECT'
-    }]
-  }]
+var battleWind = new UI.Window({
+  fullscreen: true
 });
-battleWindMenu.on('click', 'back', function (e) {});
+
+var yourHP = new UI.Rect({
+  size: new Vector2(52, 5),
+  position: new Vector2(72, 120),
+  borderColor: 'black',
+  backgroundColor: 'white'
+});
+battleWind.add(yourHP);
+var yourHPBar = new UI.Rect({
+  size: new Vector2(50, 3),
+  position: new Vector2(73, 121),
+  borderColor: 'black',
+  backgroundColor: 'black'
+}); // TODO: make dynamic
+battleWind.add(yourHPBar);
+var yourPokeName = new UI.Text({
+  text: "YOURPOKE",
+  font: 'gothic-18-bold',
+  color: 'black',
+  textOverflow: 'ellipsis',
+  textAlign: 'left',
+  position: new Vector2(73, 81),
+  size: new Vector2(50, 25)
+});
+battleWind.add(yourPokeName);
+var yourPokeInfo = new UI.Text({
+  text: "L69, M, BRN",
+  font: 'gothic-14',
+  color: 'black',
+  textOverflow: 'wrap',
+  textAlign: 'left',
+  position: new Vector2(73, 106),
+  size: new Vector2(50, 15)
+});
+battleWind.add(yourPokeInfo);
+
+var opponentHP = new UI.Rect({
+  size: new Vector2(52, 5),
+  position: new Vector2(20, 64),
+  borderColor: 'black',
+  backgroundColor: 'white'
+});
+battleWind.add(opponentHP);
+var opponentHPBar = new UI.Rect({
+  size: new Vector2(50, 3),
+  position: new Vector2(21, 65),
+  borderColor: 'black',
+  backgroundColor: 'black'
+});
+battleWind.add(opponentHPBar);
+var opponentPokeName = new UI.Text({
+  text: "OPPONENT",
+  font: 'gothic-18-bold',
+  color: 'black',
+  textOverflow: 'ellipsis',
+  textAlign: 'left',
+  position: new Vector2(20, 24),
+  size: new Vector2(50, 25)
+});
+battleWind.add(opponentPokeName);
+var opponentPokeInfo = new UI.Text({
+  text: "L81, PAR",
+  font: 'gothic-14',
+  color: 'black',
+  textOverflow: 'wrap',
+  textAlign: 'left',
+  position: new Vector2(20, 49),
+  size: new Vector2(50, 15)
+});
+battleWind.add(opponentPokeInfo);
+
+var clearRect = new UI.Rect({
+  size: new Vector2(144, 168)
+});
+battleWind.add(clearRect);
+var infoRect = new UI.Rect({
+  position: new Vector2(0, 144),
+  size: new Vector2(144, 24),
+  borderColor: 'black',
+  backgroundColor: 'white'
+});
+battleWind.add(infoRect);
+var infoText = new UI.Text({
+  text: "The battle has started. Press SELECT",
+  font: 'gothic-14',
+  color: 'black',
+  textOverflow: 'wrap',
+  textAlign: 'left',
+  position: new Vector2(0, 144),
+  size: new Vector2(144, 24)
+});
+battleWind.add(infoText);
 
 // TITLE SCREEN AND SEARCH SCREEN
 
@@ -52,7 +126,7 @@ title.on('click', 'select', function (e) {
   searching.show();
   searching.on('click', 'select', function (e) {
     // Debug: move onto battle screen
-    battleWindMenu.show();
+    battleWind.show();
   });
 });
 
@@ -130,7 +204,7 @@ var battleMenu = new UI.Menu({
 // BATTLE MENUS ACTIONS
 
 battleMenu.on('click', 'back', function (e) {
-  battleWindMenu.show();
+  battleWind.show();
 });
 battleMenu.on('select', function (e) {
   switch (e.itemIndex) {
@@ -180,6 +254,6 @@ forfeitMenu.on('select', function (e) {
   }
 });
 
-battleWindMenu.on('click', 'select', function (e) {
+battleWind.on('click', 'select', function (e) {
   battleMenu.show();
 });
