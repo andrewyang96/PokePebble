@@ -35,17 +35,17 @@ var infoRect = new UI.Rect({
 
 var yourHP = new UI.Rect({
   size: new Vector2(52, 5),
-  position: new Vector2(72, 120),
+  position: new Vector2(72, 100),
   borderColor: 'black',
   backgroundColor: 'white'
 });
 battleWind.add(yourHP);
 var yourHPBar = new UI.Rect({
   size: new Vector2(50, 3),
-  position: new Vector2(73, 121),
+  position: new Vector2(73, 101),
   borderColor: 'black',
   backgroundColor: 'black'
-}); // TODO: make dynamic
+});
 battleWind.add(yourHPBar);
 var yourPokeName = new UI.Text({
   text: "CHARIZARD",
@@ -53,8 +53,8 @@ var yourPokeName = new UI.Text({
   color: 'black',
   textOverflow: 'ellipsis',
   textAlign: 'left',
-  position: new Vector2(73, 81),
-  size: new Vector2(50, 25)
+  position: new Vector2(72, 60),
+  size: new Vector2(72, 15)
 });
 battleWind.add(yourPokeName);
 var yourPokeInfo = new UI.Text({
@@ -63,21 +63,21 @@ var yourPokeInfo = new UI.Text({
   color: 'black',
   textOverflow: 'wrap',
   textAlign: 'left',
-  position: new Vector2(73, 106),
+  position: new Vector2(72, 80),
   size: new Vector2(50, 15)
 });
 battleWind.add(yourPokeInfo);
 
 var opponentHP = new UI.Rect({
   size: new Vector2(52, 5),
-  position: new Vector2(20, 64),
+  position: new Vector2(4, 44),
   borderColor: 'black',
   backgroundColor: 'white'
 });
 battleWind.add(opponentHP);
 var opponentHPBar = new UI.Rect({
   size: new Vector2(50, 3),
-  position: new Vector2(21, 65),
+  position: new Vector2(5, 45),
   borderColor: 'black',
   backgroundColor: 'black'
 });
@@ -88,8 +88,8 @@ var opponentPokeName = new UI.Text({
   color: 'black',
   textOverflow: 'ellipsis',
   textAlign: 'left',
-  position: new Vector2(20, 24),
-  size: new Vector2(50, 25)
+  position: new Vector2(4, 4),
+  size: new Vector2(72, 15)
 });
 battleWind.add(opponentPokeName);
 var opponentPokeInfo = new UI.Text({
@@ -98,7 +98,7 @@ var opponentPokeInfo = new UI.Text({
   color: 'black',
   textOverflow: 'wrap',
   textAlign: 'left',
-  position: new Vector2(20, 49),
+  position: new Vector2(4, 24),
   size: new Vector2(50, 15)
 });
 battleWind.add(opponentPokeInfo);
