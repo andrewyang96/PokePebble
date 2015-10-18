@@ -29,6 +29,16 @@
                 "type": "font"
             },
             {
+                "file": "images/umbreon-front",
+                "name": "IMAGES_UMBREON_FRONT",
+                "type": "png"
+            },
+            {
+                "file": "images/charizard-back",
+                "name": "IMAGES_CHARIZARD_BACK",
+                "type": "png"
+            },
+            {
                 "file": "images/PPLogo.png",
                 "menuIcon": true,
                 "name": "IMAGES_PPLOGO_PNG",
