@@ -138,17 +138,17 @@ var attackMenu = new UI.Menu({
   sections: [{
     title: 'Attack',
     items: [{
-      title: 'Attack 1',
-      subtitle: 'Some info'
+      title: 'Fire Blast',
+      subtitle: 'Fire, 110 BP, 85%, 6/8'
     }, {
-      title: 'Attack 2',
-      subtitle: 'Some more info'
+      title: 'Ancient Power',
+      subtitle: 'Rock, 60 BP, 100%, 7/8'
     }, {
-      title: 'Attack 3',
-      subtitle: 'Yet even more info'
+      title: 'Solar Beam',
+      subtitle: 'Grass, 120 BP, 100%, 16/16'
     }, {
-      title: 'Attack 4',
-      subtitle: 'info'
+      title: 'Roost',
+      subtitle: 'Flying, 16/16'
     }]
   }]
 });
@@ -157,20 +157,20 @@ var switchMenu = new UI.Menu({
   sections: [{
     title: 'Switch Pokemon',
     items: [{
-      title: 'Pokemon 1',
-      subtitle: 'Its condition'
+      title: 'Wigglytuff',
+      subtitle: 'Normal/Fairy, L81'
     }, {
-      title: 'Pokemon 2',
-      subtitle: 'Second poke condition'
+      title: 'Machamp',
+      subtitle: 'Fighting, L75'
     }, {
-      title: 'Pokemon 3',
-      subtitle: 'Third poke'
+      title: 'Arbok',
+      subtitle: 'Poison, L78'
     }, {
-      title: 'Pokemon 4',
-      subtitle: 'Fourth info'
+      title: 'Fearow',
+      subtitle: 'Normal/Flying, L78'
     }, {
-      title: 'Pokemon 5',
-      subtitle: 'Last poke'
+      title: 'Giratina',
+      subtitle: 'Ghost/Dragon, L70'
     }]
   }]
 });
@@ -227,6 +227,8 @@ attackMenu.on('click', 'back', function (e) {
 });
 attackMenu.on('select', function (e) {
   // Select attack
+  infoText.text = "Charizard uses " + e.item.title;
+  battleWind.show();
 });
 
 switchMenu.on('click', 'back', function (e) {
@@ -234,6 +236,8 @@ switchMenu.on('click', 'back', function (e) {
 });
 switchMenu.on('select', function (e) {
   // Switch pokemon
+  infoText.text = "Come back, Charizard! Go " + e.item.title + "!";
+  battleWind.show();
 });
 
 forfeitMenu.on('click', 'back', function (e) {
