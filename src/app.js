@@ -33,6 +33,19 @@ var infoRect = new UI.Rect({
   backgroundColor: 'white'
 });
 
+var yourPokemon = new UI.Image({
+  image: 'images/charizard-back.png',
+  position: new Vector2(52, 4),
+  size: new Vector2(144, 144)
+});
+battleWind.add(yourPokemon);
+var opponentPokemon = new UI.Image({
+  image: 'images/umbreon-front.png',
+  position: new Vector2(80, 4),
+  size: new Vector2(144, 144)
+});
+battleWind.add(opponentPokemon);
+
 var yourHP = new UI.Rect({
   size: new Vector2(52, 5),
   position: new Vector2(72, 100),
@@ -227,7 +240,7 @@ attackMenu.on('click', 'back', function (e) {
 });
 attackMenu.on('select', function (e) {
   // Select attack
-  infoText.text = "Charizard uses " + e.item.title;
+  infoText.text("Charizard uses " + e.item.title);
   battleWind.show();
 });
 
@@ -236,7 +249,7 @@ switchMenu.on('click', 'back', function (e) {
 });
 switchMenu.on('select', function (e) {
   // Switch pokemon
-  infoText.text = "Come back, Charizard! Go " + e.item.title + "!";
+  infoText.text("Come back, Charizard! Go " + e.item.title + "!");
   battleWind.show();
 });
 
