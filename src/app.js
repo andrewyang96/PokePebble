@@ -64,11 +64,11 @@ title.on('click', 'select', function (e) {
   searching.body('Press BACK to cancel.');
   searching.show();
   // Search for an opponent
-  Pebble.sendAppMessage({ '0': 1, '1': 1 }, function (e) {
+  Pebble.sendAppMessage({ '0': 1 }, function (e) {
     console.log("Searching for battle");
   }, function (e) {
     console.log("Failed to search for battle:", e.error.message);
-  });
+  });/*
   searching.on('click', 'back', function (e) {
     // Cancel search
     Pebble.sendAppMessage({ '0': 1, '1': 0 }, function (e) {
@@ -77,7 +77,7 @@ title.on('click', 'select', function (e) {
     }, function (e) {
       console.log("Failed to cancel search:", e.error.message);
     });
-  });
+  });*/
 });
 
 // BATTLE MENUS
@@ -237,7 +237,10 @@ Pebble.addEventListener('ready', function (e) {
 });
 
 Pebble.addEventListener('appmessage', function (e) {
-  var firstEl = JSON.parse(e.payload['0']);
+  if (!e) console.log("What");
+  if (!e.payload) console.log("payload wat");
+  console.log("Payload:", JSON.stringify(e.payload));
+  var firstEl = e.payload['0'];
   if (firstEl.login) {
     // Store login info
     username = firstEl.username;
