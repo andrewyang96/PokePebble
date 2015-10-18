@@ -22,6 +22,16 @@ title.show();
 var battleWind = new UI.Window({
   fullscreen: true
 });
+var clearRect = new UI.Rect({
+  size: new Vector2(144, 168)
+});
+battleWind.add(clearRect);
+var infoRect = new UI.Rect({
+  position: new Vector2(0, 108),
+  size: new Vector2(144, 60),
+  borderColor: 'black',
+  backgroundColor: 'white'
+});
 
 var yourHP = new UI.Rect({
   size: new Vector2(52, 5),
@@ -38,8 +48,8 @@ var yourHPBar = new UI.Rect({
 }); // TODO: make dynamic
 battleWind.add(yourHPBar);
 var yourPokeName = new UI.Text({
-  text: "YOURPOKE",
-  font: 'gothic-18-bold',
+  text: "CHARIZARD",
+  font: 'gothic-14-bold',
   color: 'black',
   textOverflow: 'ellipsis',
   textAlign: 'left',
@@ -48,7 +58,7 @@ var yourPokeName = new UI.Text({
 });
 battleWind.add(yourPokeName);
 var yourPokeInfo = new UI.Text({
-  text: "L69, M, BRN",
+  text: "L74, M",
   font: 'gothic-14',
   color: 'black',
   textOverflow: 'wrap',
@@ -73,8 +83,8 @@ var opponentHPBar = new UI.Rect({
 });
 battleWind.add(opponentHPBar);
 var opponentPokeName = new UI.Text({
-  text: "OPPONENT",
-  font: 'gothic-18-bold',
+  text: "UMBREON",
+  font: 'gothic-14-bold',
   color: 'black',
   textOverflow: 'ellipsis',
   textAlign: 'left',
@@ -83,7 +93,7 @@ var opponentPokeName = new UI.Text({
 });
 battleWind.add(opponentPokeName);
 var opponentPokeInfo = new UI.Text({
-  text: "L81, PAR",
+  text: "L77, F",
   font: 'gothic-14',
   color: 'black',
   textOverflow: 'wrap',
@@ -93,25 +103,15 @@ var opponentPokeInfo = new UI.Text({
 });
 battleWind.add(opponentPokeInfo);
 
-var clearRect = new UI.Rect({
-  size: new Vector2(144, 168)
-});
-battleWind.add(clearRect);
-var infoRect = new UI.Rect({
-  position: new Vector2(0, 144),
-  size: new Vector2(144, 24),
-  borderColor: 'black',
-  backgroundColor: 'white'
-});
 battleWind.add(infoRect);
 var infoText = new UI.Text({
-  text: "The battle has started. Press SELECT",
+  text: "The battle has started. Press SELECT to begin!",
   font: 'gothic-14',
   color: 'black',
   textOverflow: 'wrap',
   textAlign: 'left',
-  position: new Vector2(0, 144),
-  size: new Vector2(144, 24)
+  position: new Vector2(0, 108),
+  size: new Vector2(144, 60)
 });
 battleWind.add(infoText);
 
