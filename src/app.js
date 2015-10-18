@@ -34,15 +34,15 @@ var infoRect = new UI.Rect({
 });
 
 var yourPokemon = new UI.Image({
-  image: 'images/charizard-back.png',
-  position: new Vector2(52, 4),
-  size: new Vector2(144, 144)
+  position: new Vector2(4, 80),
+  compositing: 'and',
+  image: 'images/charizard-back.png'
 });
 battleWind.add(yourPokemon);
 var opponentPokemon = new UI.Image({
-  image: 'images/umbreon-front.png',
   position: new Vector2(80, 4),
-  size: new Vector2(144, 144)
+  compositing: 'and',
+  image: 'images/umbreon-front.png'
 });
 battleWind.add(opponentPokemon);
 

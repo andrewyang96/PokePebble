@@ -29,13 +29,13 @@
                 "type": "font"
             },
             {
-                "file": "images/charizard-back.png",
-                "name": "IMAGES_CHARIZARD_BACK_PNG",
+                "file": "images/umbreon-front.png",
+                "name": "IMAGES_UMBREON_FRONT_PNG",
                 "type": "png"
             },
             {
-                "file": "images/umbreon-front.png",
-                "name": "IMAGES_UMBREON_FRONT_PNG",
+                "file": "images/charizard-back.png",
+                "name": "IMAGES_CHARIZARD_BACK_PNG",
                 "type": "png"
             },
             {
