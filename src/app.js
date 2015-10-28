@@ -145,9 +145,20 @@ title.on('click', 'select', function (e) {
 
 // BATTLE MENUS
 
-// TODO: make attackMenu and switchMenu dynamic
+var forfeitMenu = new UI.Menu({
+  sections: [{
+    title: 'Are you sure?',
+    items: [{
+      title: 'No',
+      subtitle: "Don't forfeit"
+    }, {
+      title: 'Yes',
+      subtitle: 'I QUIT!'
+    }]
+  }]
+});
 
-var attackMenu = new UI.Menu({
+var battleMenu = new UI.Menu({
   sections: [{
     title: 'Attack',
     items: [{
@@ -163,11 +174,7 @@ var attackMenu = new UI.Menu({
       title: 'Roost',
       subtitle: 'Flying, 16/16'
     }]
-  }]
-});
-
-var switchMenu = new UI.Menu({
-  sections: [{
+  }, {
     title: 'Switch Pokemon',
     items: [{
       title: 'Wigglytuff',
@@ -185,30 +192,9 @@ var switchMenu = new UI.Menu({
       title: 'Giratina',
       subtitle: 'Ghost/Dragon, L70'
     }]
-  }]
-});
-
-var forfeitMenu = new UI.Menu({
-  sections: [{
-    title: 'Are you sure?',
+  }, {
+    title: 'Forfeit',
     items: [{
-      title: 'No',
-      subtitle: "Don't forfeit"
-    }, {
-      title: 'Yes',
-      subtitle: 'I QUIT!'
-    }]
-  }]
-});
-
-var battleMenu = new UI.Menu({
-  sections: [{
-    title: 'Options',
-    items: [{
-      title: 'Attack'
-    }, {
-      title: 'Switch'
-    }, {
       title: 'Forfeit'
     }]
   }]
@@ -220,14 +206,16 @@ battleMenu.on('click', 'back', function (e) {
   battleWind.show();
 });
 battleMenu.on('select', function (e) {
-  switch (e.itemIndex) {
-    case 0:
-      attackMenu.show();
+  switch (e.sectionIndex) {
+    case 0: // Attack
+      infoText.text("Charizard uses " + e.item.title);
+      battleMenu.hide();
       break;
-    case 1:
-      switchMenu.show();
+    case 1: // Switch
+      infoText.text("Come back, Charizard! Go " + e.item.title + "!");
+      battleMenu.hide();
       break;
-    case 2:
+    case 2: // Forfeit
       forfeitMenu.show();
       break;
     default:
@@ -235,26 +223,8 @@ battleMenu.on('select', function (e) {
   }
 });
 
-attackMenu.on('click', 'back', function (e) {
-  battleMenu.show();
-});
-attackMenu.on('select', function (e) {
-  // Select attack
-  infoText.text("Charizard uses " + e.item.title);
-  battleWind.show();
-});
-
-switchMenu.on('click', 'back', function (e) {
-  battleMenu.show();
-});
-switchMenu.on('select', function (e) {
-  // Switch pokemon
-  infoText.text("Come back, Charizard! Go " + e.item.title + "!");
-  battleWind.show();
-});
-
 forfeitMenu.on('click', 'back', function (e) {
-  battleMenu.show();
+  forfeitMenu.hide();
 });
 forfeitMenu.on('select', function (e) {
   switch (e.itemIndex) {
