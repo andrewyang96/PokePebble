@@ -233,6 +233,9 @@ forfeitMenu.on('select', function (e) {
       break;
     case 1:
       // Forfeit :sadface:
+      forfeitMenu.hide();
+      battleMenu.hide();
+      battleWind.hide();
       title.show();
       break;
     default:
@@ -244,3 +247,4 @@ forfeitMenu.on('select', function (e) {
 battleWind.on('click', 'select', function (e) {
   battleMenu.show();
 });
+battleWind.on('click', 'back', function (e) {}); // Disable battleWind click back
